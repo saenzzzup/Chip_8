@@ -90,12 +90,24 @@ class Opcode(object):
 			print("8XY4")
 
 		elif((opcode & 0xF00F) == 0x8005):
+			f registers['V'][(opcode & 0x0F00)>>12] > registers['V'][(opcode & 0x00F0)>>12]:
+				registers['V'][0xF] = 0
+			else:
+				registers['V'][0xF] = 1
+			registers['V'][(opcode & 0x0F00)>>12] -= registers['V'][(opcode & 0x00F0)>>12]
 			print("8XY5")
 
 		elif((opcode & 0xF00F) == 0x8006):
+			registers['V'][0xF] = registers['V'][(opcode & 0x00F0)>>12] & 1
+			registers['V'][(opcode & 0x0F00)>>12] = registers['V'][(opcode & 0x00F0)>>12] >> 1
 			print("8XY6")
 
 		elif((opcode & 0xF00F) == 0x8007):
+			if registers['V'][(opcode & 0x0F00)>>12] > registers['V'][(opcode & 0x00F0)>>12]:
+				registers['V'][0xF] = 0
+			else:
+				registers['V'][0xF] = 1
+			registers['V'][(opcode & 0x0F00)>>12] = registers['V'][(opcode & 0x00F0)>>12] - registers['V'][(opcode & 0x0F00)>>12]
 			print("8XY7")
 
 		elif((opcode & 0xF00F) == 0x800E):
@@ -103,7 +115,7 @@ class Opcode(object):
 
 		elif((opcode & 0xF000) == 0x9000):
 			if (registers['V'][(opcode & 0x0F00)>>12] != registers['V'][(opcode&0x00F0)>>12]):
-				registers['pc'] += 1
+				registers['pc'] += 2
 			print("9XY0")
 	
 		elif((opcode & 0xF000) == 0xA000):
@@ -111,11 +123,13 @@ class Opcode(object):
 			print('ANNN')
 
 		elif((opcode & 0xF000) == 0xB000):
-			registers['pc'] = registers['v'][0] + (opcode & 0x0FFF)
+			registers['pc'] = registers['V'][0] + (opcode & 0x0FFF)
 			print("BNNN")
 
 		elif((opcode & 0xF000) == 0xC000):
-			print("a")
+			r = random.randint(0, 0x00FF)
+			registers['V'][(opcode & 0x0f00)>>12] = r & ((opcode & 0x00FF)>>8)
+			print("CXNN")
 
 		elif((opcode & 0xF000) == 0xD000):
 			print("a")
@@ -127,15 +141,18 @@ class Opcode(object):
 			print("EXA1")
 
 		elif((opcode & 0xF00F) == 0xF007):
+			registers['V'][(opcode & 0x0F00)>>12] = timers['delay'] 
 			print("FX07")
 
 		elif((opcode & 0xF00F) == 0xF00A):
 			print("FX0A")
 
 		elif((opcode & 0xF0FF) == 0xF015):
+			timers['delay'] = registers['V'][(opcode & 0x0F00)>>12]
 			print("FX15")
 
 		elif((opcode & 0xF00F) == 0xF008):
+			timers['sound'] = registers['V'][(opcode & 0x0F00)>>12]
 			print("FX18")
 
 		elif((opcode & 0xF00F) == 0xF00E):
