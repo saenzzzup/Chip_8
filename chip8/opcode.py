@@ -24,6 +24,7 @@ class Opcode(object):
 	def execute(opcode, registers, memory, stack):
 		if((opcode & 0xF000) == 0x0000):
 			print("a")
+			
 		elif(opcode == 0x00E0):
 			print("a")
 
@@ -32,36 +33,36 @@ class Opcode(object):
 			print("00EE")
 
 		elif((opcode & 0xF000) == 0x1000):
+			registers['pc'] = opcode & 0x0FFF
 			print("1NNN")
 
 		elif((opcode & 0xF000) == 0x2000):
 			stack.push(registers['pc'])
-			pc = opcode & 0x0FFF
+			registers['pc'] = opcode & 0x0FFF
 			print("2NNN")
 
 
 		elif((opcode & 0xF000) == 0x3000):
-			if (registers['V'][(opcode & 0x0F00) >> 12] == memory[(opcode & 0x00FF) >> 12]):
-				registers['pc'] += 1
-
+			if (registers['V'][(opcode & 0x0F00) >> 12] == (opcode & 0x00FF):
+				registers['pc'] += 2
 			print("3XNN")
 
 		elif((opcode & 0xF000) == 0x4000):
-			if (registers['V'][(opcode & 0x0F00) >> 12] != memory[(opcode & 0x00FF) >> 12]):
-				registers['pc'] += 1
+			if (registers['V'][(opcode & 0x0F00) >> 12] != (opcode & 0x00FF)):
+				registers['pc'] += 2
 			print("4XNN")
 
 		elif((opcode & 0xF000) == 0x5000):
 			if (registers['V'][(opcode & 0x0F00) >> 12] == registers['V'][(opcode & 0x00F0) >> 12]):
-				registers['pc'] += 1
+				registers['pc'] += 2
 			print("5XY0")
 
 		elif((opcode & 0xF000) == 0x6000):
-			registers['V'][(opcode & 0x0F00)>>12] = ((opcode & 0x00FF)>>8)
+			registers['V'][(opcode & 0x0F00)>>12] = (opcode & 0x00FF)
 			print("6XNN")
 
 		elif((opcode & 0xF000) == 0x7000):
-			registers['V'][(opcode & 0x0F00)>>12] += ((opcode & 0x00FF)>>8)
+			registers['V'][(opcode & 0x0F00)>>12] += (opcode & 0x00FF)
 			print("7XNN")
 
 		elif((opcode & 0xF00F) == 0x8000):
@@ -86,15 +87,21 @@ class Opcode(object):
 
 		#Añadir carry
 		elif((opcode & 0xF00F) == 0x8004):
+			if registers['V'][(opcode & 0x0F00)>>12] + registers['V'][(opcode & 0x00F0)>>12] > 0xFF:
+				registers['V'][0xF] = 1
+			else:
+				registers['V'][0xF] = 0
 			registers['V'][(opcode & 0x0F00)>>12] += registers['V'][(opcode & 0x00F0)>>12]
+			registers['V'][(opcode & 0x0F00)>>12] &= 0xFF
 			print("8XY4")
 
 		elif((opcode & 0xF00F) == 0x8005):
-			f registers['V'][(opcode & 0x0F00)>>12] > registers['V'][(opcode & 0x00F0)>>12]:
+			if registers['V'][(opcode & 0x0F00)>>12] < registers['V'][(opcode & 0x00F0)>>12]:
 				registers['V'][0xF] = 0
 			else:
 				registers['V'][0xF] = 1
 			registers['V'][(opcode & 0x0F00)>>12] -= registers['V'][(opcode & 0x00F0)>>12]
+			registers['V'][(opcode & 0x0F00)>>12] &= 0xFF
 			print("8XY5")
 
 		elif((opcode & 0xF00F) == 0x8006):
@@ -108,6 +115,7 @@ class Opcode(object):
 			else:
 				registers['V'][0xF] = 1
 			registers['V'][(opcode & 0x0F00)>>12] = registers['V'][(opcode & 0x00F0)>>12] - registers['V'][(opcode & 0x0F00)>>12]
+			registers['V'][(opcode & 0x0F00)>>12] &= 0xFF
 			print("8XY7")
 
 		elif((opcode & 0xF00F) == 0x800E):
@@ -159,15 +167,29 @@ class Opcode(object):
 			print("FX1E")
 
 		elif((opcode & 0xF00F) == 0xF009):
+			registers['I'] = (5*(registers['V'][(opcode & 0x0F00)>>12])) & 0xFFF
 			print("FX29")
 
 		elif((opcode & 0xF00F) == 0xF003):
+			registers['I'] = registers['V'][(opcode & 0x0F00)>>12] / 100
+			registers['I' + 1] = (registers['V'][(opcode & 0x0F00)>>12] / 10) % 10
+			registers['I' + 2] = (registers['V'][(opcode & 0x0F00)>>12] % 100) % 10
 			print("FX33")
 
 		elif((opcode & 0xF0FF) == 0xF055):
+			i = 0
+			while i <= registers['V'][(opcode & 0x0F00)>>12]:
+				memory[registers['I' + i]] = registers['V'][i]
+				i += 1
+			registers['I'] += (registers['V'][(opcode & 0x0F00)>>12] + 1)
 			print("FX55")
 
 		elif((opcode & 0xF0FF) == 0xF065):
+			i = 0
+			while i <= registers['V'][(opcode & 0x0F00)>>12]:
+				registers['V'][i] = memory[registers['I' + i]]
+				i += 1
+			registers['I'] += (registers['V'][(opcode & 0x0F00)>>12] + 1)
 			print("FX65")
 
 		else:
