@@ -43,17 +43,17 @@ class Opcode(object):
 
 
 		elif((opcode & 0xF000) == 0x3000):
-			if (registers['V'][(opcode & 0x0F00) >> 12] == (opcode & 0x00FF):
+			if registers['V'][(opcode & 0x0F00) >> 8] == (opcode & 0x00FF):
 				registers['pc'] += 2
 			print("3XNN")
 
 		elif((opcode & 0xF000) == 0x4000):
-			if (registers['V'][(opcode & 0x0F00) >> 12] != (opcode & 0x00FF)):
+			if registers['V'][(opcode & 0x0F00) >> 8] != (opcode & 0x00FF):
 				registers['pc'] += 2
 			print("4XNN")
 
 		elif((opcode & 0xF000) == 0x5000):
-			if (registers['V'][(opcode & 0x0F00) >> 12] == registers['V'][(opcode & 0x00F0) >> 12]):
+			if (registers['V'][(opcode & 0x0F00) >> 8] == registers['V'][(opcode & 0x00F0) >> 12]):
 				registers['pc'] += 2
 			print("5XY0")
 
@@ -66,7 +66,7 @@ class Opcode(object):
 			print("7XNN")
 
 		elif((opcode & 0xF00F) == 0x8000):
-			registers['V'][(opcode & 0x0F00)>>12] = registers['V'][(opcode & 0x00F0)>>12]
+			registers['V'][(opcode & 0x0F00)>>8] = registers['V'][(opcode & 0x00F0)>>4]
 			print("8XY0")
 
 		elif((opcode & 0xF00F) == 0x8001):
